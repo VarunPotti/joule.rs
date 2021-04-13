@@ -7,7 +7,7 @@ pub fn red(sentence: &str) -> String {
 
     s
 }
-
+#[allow(dead_code)]
 pub fn blue(sentence: &str) -> String {
     let s: String;
 
@@ -30,6 +30,14 @@ pub fn yellow(sentence: &str) -> String {
     let s: String;
 
     s = ansi_term::Color::Yellow.bold().paint(sentence).to_string();
+
+    s
+}
+#[allow(dead_code)]
+pub fn purple(sentence: &str) -> String {
+    let s: String;
+
+    s = ansi_term::Color::Purple.bold().paint(sentence).to_string();
 
     s
 }

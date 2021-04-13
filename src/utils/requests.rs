@@ -30,3 +30,20 @@ pub fn get_package(name: &str) -> Value {
         }
     }
 }
+#[allow(unused)]
+pub fn download_file(url: &str) -> String{
+    let mut response: String = String::new();
+    
+    match minreq::get(url).send() {
+        Ok(text) => {
+            let res = text.as_str().unwrap();
+            if res != "404: Not Found" {
+                response = res.to_string();            
+            }
+        },
+        Err(error) => {
+            println!("{}", ansi::red(error.to_string().as_str()))
+        },
+    }
+    response
+}
