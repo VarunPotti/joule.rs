@@ -1,11 +1,11 @@
 #[path = "./ansi.rs"]
 mod ansi;
-use miniserde::{json};
+use serde_json::{ Value, from_str };
 use std::process;
 use minreq;
 
 #[allow(unused)]
-pub fn get_package(name: &str) -> String {
+pub fn get_package(name: &str) -> Value {
     let mut response: String = String::new();
 
     match minreq::get(format!("https://raw.githubusercontent.com/joule-package-manager/joule-packages/main/packages/{}.json", name)).send() {
@@ -20,7 +20,7 @@ pub fn get_package(name: &str) -> String {
         },
     }
     
-    match json::from_str(response.as_str()) {
+    match from_str(response.as_str()) {
         Ok(data) => {
             data
         },
