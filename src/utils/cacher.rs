@@ -13,6 +13,7 @@ use std::path::Path;
 struct CachedFile {
     date: String,
 }
+#[allow(dead_code)]
 pub fn cache() {
     let path = format!(
         r#"{}\{}\{}"#,

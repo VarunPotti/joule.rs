@@ -7,6 +7,9 @@ mod installer;
 #[path = "./commands/search.rs"]
 mod search;
 
+#[path = "./commands/show.rs"]
+mod show;
+
 #[path = "./utils/cacher.rs"]
 mod cacher;
 
@@ -51,6 +54,8 @@ fn main() {
             } else {
                 let _ = search::search(&arguments[2], &"1".to_string());
             }
+        } else if command == "show" {
+            let _ = show::show(&arguments[2]);
         }
     } else if arguments.len() == 2 {
         let command: &str = &arguments[1];
