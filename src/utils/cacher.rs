@@ -4,15 +4,16 @@ mod ansi;
 mod request;
 
 use chrono;
-use serde_json::json;
+use miniserde::{json, Deserialize, Serialize};
 use std::env;
 use std::io::Read;
 use std::io::{BufWriter, Write};
 use std::path::Path;
-#[derive(serde::Deserialize, serde::Serialize)]
+#[derive(Serialize, Deserialize, Debug)]
 struct CachedFile {
     date: String,
 }
+
 #[allow(dead_code)]
 pub fn cache() {
     let path = format!(
@@ -21,13 +22,18 @@ pub fn cache() {
         r#"AppData\Roaming"#,
         r#"Joule\data\db.json"#,
     );
-    let json_val = json!({ "date":  chrono::offset::Local::now().format("%Y %b %d %H:%M:%S%.3f %z").to_string() });
+    let date = CachedFile {
+        date: (chrono::offset::Local::now()
+            .format("%Y %b %d %H:%M:%S%.3f %z")
+            .to_string()),
+    };
+    let json_val = json::to_string(&date);
     if Path::new(&path).exists() {
         let mut s = String::new();
         let _contents = std::fs::File::open(&path)
             .expect("Something went wrong reading the file")
             .read_to_string(&mut s);
-        let json: CachedFile = serde_json::from_str(&s).unwrap();
+        let json: CachedFile = json::from_str(&s).unwrap();
         let today_date = chrono::offset::Local::now();
         let last_date = chrono::DateTime::parse_from_str(&json.date, "%Y %b %d %H:%M:%S%.3f %z");
         let num_days = today_date

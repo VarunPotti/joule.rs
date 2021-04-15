@@ -4,13 +4,15 @@ mod ansi;
 #[path = "../utils/cacher.rs"]
 mod cacher;
 
+use miniserde::{json, Deserialize, Serialize};
+
 //? Imports
 use std::env;
 use std::fs::File;
 use std::io::Read;
 use std::ops::Deref;
 
-#[derive(serde::Deserialize, serde::Serialize)]
+#[derive(Deserialize, Serialize)]
 struct PackageList {
     packages: Vec<String>,
 }
@@ -27,7 +29,7 @@ pub fn search(app_name: &str, resultcount: &std::string::String) {
         .expect("Something went wrong reading the file")
         .read_to_string(&mut s);
 
-    let json: PackageList = serde_json::from_str(&s).unwrap();
+    let json: PackageList = json::from_str(&s).unwrap();
     let package = json
         .packages
         .iter()

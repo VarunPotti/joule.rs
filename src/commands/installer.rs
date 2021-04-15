@@ -7,7 +7,7 @@ mod requests;
 #[path = "../utils/ansi.rs"]
 mod ansi;
 
-use serde::{Deserialize, Serialize};
+use miniserde::{json, Deserialize, Serialize};
 use std::env;
 use std::fs::File;
 use std::io;
@@ -20,11 +20,11 @@ pub struct PackageTemp {
     display_name: String,
     version: String,
 }
-#[derive(serde::Deserialize, serde::Serialize)]
+#[derive(Deserialize, Serialize)]
 struct PackageList {
     packages: Vec<String>,
 }
-pub fn install(app_name: &str) {
+pub async fn install(app_name: &str) -> miniserde::Result<()> {
     let mut s = String::new();
 
     let db_list = &format!(
@@ -37,7 +37,7 @@ pub fn install(app_name: &str) {
         .expect("Something went wrong reading the file")
         .read_to_string(&mut s);
 
-    let json: PackageList = serde_json::from_str(&s).unwrap();
+    let json: PackageList = json::from_str(&s).unwrap();
     let package = json
         .packages
         .iter()
@@ -46,21 +46,9 @@ pub fn install(app_name: &str) {
     let result = difflib::get_close_matches(app_name, package, 1, 0.6);
     if result.len() > 0 {
         if app_name == result[0] {
-            let resp = requests::get_package(app_name);
-            let ref pkg = &resp[resp[r#"version"#].to_string()];
-            let _package = package::Package {
-                package_name: resp["package_name"].to_string(),
-                display_name: resp["display_name"].to_string(),
-                version: resp["version"].to_string(),
-                threads: resp["threads"].to_string(),
-                url: pkg["url"].to_string(),
-                file_type: pkg[r#"file-type"#].to_string(),
-                iswitches: pkg["iswitches"].as_array().unwrap().to_vec(),
-                uswitches: pkg["uswitches"].as_array().unwrap().to_vec(),
-                dependencies: pkg["dependencies"].as_array().unwrap().to_vec(),
-                Home_page: resp["Home_page"].to_string(),
-                creator: resp["creator"].to_string(),
-            };
+            let resp: package::Package = json::from_str(&requests::get_package(app_name))?;
+            println!("{:?}", resp);
+            Ok(())
         } else {
             println!(
                 "{}- {}",
@@ -74,23 +62,12 @@ pub fn install(app_name: &str) {
                 .read_line(&mut cont)
                 .expect("Failed to read line");
             if cont.to_ascii_lowercase() == "y\r\n" {
-                let resp = requests::get_package(result[0]);
-                let ref pkg = &resp[resp[r#"version"#].to_string()];
-                let _package = package::Package {
-                    package_name: resp["package_name"].to_string(),
-                    display_name: resp["display_name"].to_string(),
-                    version: resp["version"].to_string(),
-                    threads: resp["threads"].to_string(),
-                    url: pkg["url"].to_string(),
-                    file_type: pkg[r#"file-type"#].to_string(),
-                    iswitches: pkg["iswitches"].as_array().unwrap().to_vec(),
-                    uswitches: pkg["uswitches"].as_array().unwrap().to_vec(),
-                    dependencies: pkg["dependencies"].as_array().unwrap().to_vec(),
-                    Home_page: resp["Home_page"].to_string(),
-                    creator: resp["creator"].to_string(),
-                };
+                let resp: package::Package = json::from_str(&requests::get_package(app_name))?;
+                println!("{:?}", resp);
+                Ok(())
             } else {
-                println!("Exiting")
+                println!("Exiting");
+                Ok(())
             }
         }
     } else {
@@ -103,6 +80,7 @@ pub fn install(app_name: &str) {
                 app_name, app_name
             )),
             ansi::blue("or ask for a package here https://github.com/joule-package-manager/joule-packages/issues/1")
-        )
+        );
+        Ok(())
     }
 }

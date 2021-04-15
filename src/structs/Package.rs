@@ -1,7 +1,6 @@
-use serde::{Deserialize, Serialize};
-use serde_json::Value;
-#[allow(non_snake_case)]
-#[derive(Deserialize, Serialize, Debug)]
+use miniserde::{json, Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Package {
     pub package_name: String,
     pub display_name: String,
@@ -9,9 +8,9 @@ pub struct Package {
     pub threads: String,
     pub url: String,
     pub file_type: String,
-    pub iswitches: Vec<Value>,
-    pub uswitches: Vec<Value>,
-    pub dependencies: Vec<Value>,
+    pub iswitches: Vec<String>,
+    pub uswitches: Vec<String>,
+    pub dependencies: Vec<String>,
     pub creator: String,
     pub Home_page: String,
 }
