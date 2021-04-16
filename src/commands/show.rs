@@ -30,7 +30,7 @@ fn print(pkt: package::Package) {
     println!("Creator: {}", ansi::blue(&pkt.creator));
     println!("HomePage: {}", ansi::blue(&pkt.Home_page));
     println!("Version: {}", ansi::blue(&pkt.version));
-    println!("Threads: {}", ansi::blue(&pkt.threads));
+    println!("Threads: {}", ansi::blue(&pkt.threads.to_string()));
     println!("Download Url: {}", ansi::blue(&pkt.url));
     println!("File_type: {}", ansi::blue(&pkt.file_type));
     println!("Install Switches: ");
@@ -78,7 +78,7 @@ pub fn show(app_name: &str) {
             package_name: resp["package_name"].to_string(),
             display_name: resp["display_name"].to_string(),
             version: resp["version"].to_string(),
-            threads: resp["threads"].to_string(),
+            threads: resp["threads"].to_string().parse::<i8>().unwrap(),
             url: pkg["url"].to_string(),
             file_type: pkg[r#"file-type"#].to_string(),
             iswitches: pkg["iswitches"].as_array().unwrap().to_vec(),
@@ -107,7 +107,7 @@ pub fn show(app_name: &str) {
                 package_name: resp["package_name"].to_string(),
                 display_name: resp["display_name"].to_string(),
                 version: resp["version"].to_string(),
-                threads: resp["threads"].to_string(),
+                threads: resp["threads"].to_string().parse::<i8>().unwrap(),
                 url: pkg["url"].to_string(),
                 file_type: pkg[r#"file-type"#].to_string(),
                 iswitches: pkg["iswitches"].as_array().unwrap().to_vec(),

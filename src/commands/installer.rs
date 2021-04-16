@@ -4,6 +4,9 @@ mod package;
 #[path = "../utils/requests.rs"]
 mod requests;
 
+#[path = "../utils/threadeddownloader.rs"]
+mod threadeddownloader;
+
 #[path = "../utils/ansi.rs"]
 mod ansi;
 
@@ -52,7 +55,7 @@ pub fn install(app_name: &str) {
                 package_name: resp["package_name"].to_string(),
                 display_name: resp["display_name"].to_string(),
                 version: resp["version"].to_string(),
-                threads: resp["threads"].to_string(),
+                threads: resp["threads"].to_string().parse::<i8>().unwrap(),
                 url: pkg["url"].to_string(),
                 file_type: pkg[r#"file-type"#].to_string(),
                 iswitches: pkg["iswitches"].as_array().unwrap().to_vec(),
@@ -61,6 +64,14 @@ pub fn install(app_name: &str) {
                 Home_page: resp["Home_page"].to_string(),
                 creator: resp["creator"].to_string(),
             };
+            let output = if _package.file_type == ".exe" {
+                format!(r#"{}{}"#, env::temp_dir().to_string_lossy(), "Setup.exe")
+            } else if _package.file_type == ".msi" {
+                format!(r#"{}{}"#, env::temp_dir().to_string_lossy(), "Setup.msi").to_string()
+            } else {
+                format!(r#"{}{}"#, env::temp_dir().to_string_lossy(), "Setup.exe")
+            };
+            threadeddownloader::threadeddownload(&pkg["url"].as_str().unwrap(), &output);
         } else {
             println!(
                 "{}- {}",
@@ -74,13 +85,13 @@ pub fn install(app_name: &str) {
                 .read_line(&mut cont)
                 .expect("Failed to read line");
             if cont.to_ascii_lowercase() == "y\r\n" {
-                let resp = requests::get_package(app_name);
+                let resp = requests::get_package(result[0]);
                 let ref pkg = resp[&resp[r#"version"#].to_string()];
                 let _package = package::Package {
                     package_name: resp["package_name"].to_string(),
                     display_name: resp["display_name"].to_string(),
                     version: resp["version"].to_string(),
-                    threads: resp["threads"].to_string(),
+                    threads: resp["threads"].to_string().parse::<i8>().unwrap(),
                     url: pkg["url"].to_string(),
                     file_type: pkg[r#"file-type"#].to_string(),
                     iswitches: pkg["iswitches"].as_array().unwrap().to_vec(),
@@ -89,6 +100,8 @@ pub fn install(app_name: &str) {
                     Home_page: resp["Home_page"].to_string(),
                     creator: resp["creator"].to_string(),
                 };
+                let output = "Setup.exe";
+                threadeddownloader::threadeddownload(&pkg["url"].as_str().unwrap(), output);
             } else {
                 println!("Exiting")
             }

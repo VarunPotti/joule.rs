@@ -1,4 +1,4 @@
-# MAXIMUM PACKAGE LIMIT 150
+# MAXIMUM PACKAGE LIMIT 200
 [package]
 name = "joule"
 version = "0.1.0"
@@ -10,8 +10,9 @@ linker = "rust-lld.exe"
 
 [dependencies]
 ansi_term = "0.12.1"
-minreq = { version = "2.3.1", features = ["https"] }
+reqwest = {version="0.11.2", features=["blocking"]}
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 chrono="0.4.19"
 difflib = "0.4.0"
+indicatif="0.15.0"
