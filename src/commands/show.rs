@@ -71,36 +71,8 @@ pub fn show(app_name: &str) {
         .map(|item| item.deref())
         .collect::<Vec<&str>>();
     let result = difflib::get_close_matches(app_name, package, 1, 0.6);
-    if app_name == result[0] {
-        let resp = requests::get_package(app_name);
-        let ref pkg = resp[&resp[r#"version"#].to_string()];
-        let _package = package::Package {
-            package_name: resp["package_name"].to_string(),
-            display_name: resp["display_name"].to_string(),
-            version: resp["version"].to_string(),
-            threads: resp["threads"].to_string().parse::<i8>().unwrap(),
-            url: pkg["url"].to_string(),
-            file_type: pkg[r#"file-type"#].to_string(),
-            iswitches: pkg["iswitches"].as_array().unwrap().to_vec(),
-            uswitches: pkg["uswitches"].as_array().unwrap().to_vec(),
-            dependencies: pkg["dependencies"].as_array().unwrap().to_vec(),
-            Home_page: resp["Home_page"].to_string(),
-            creator: resp["creator"].to_string(),
-        };
-        print(_package);
-    } else {
-        println!(
-            "{}- {}",
-            ansi::green("Autocorrecting to "),
-            ansi::blue(result[0])
-        );
-        println!("Continue? (y/n)");
-
-        let mut cont = String::new();
-        io::stdin()
-            .read_line(&mut cont)
-            .expect("Failed to read line");
-        if cont.to_ascii_lowercase() == "y\r\n" {
+    if result.len() > 0 {
+        if app_name == result[0] {
             let resp = requests::get_package(app_name);
             let ref pkg = resp[&resp[r#"version"#].to_string()];
             let _package = package::Package {
@@ -116,11 +88,52 @@ pub fn show(app_name: &str) {
                 Home_page: resp["Home_page"].to_string(),
                 creator: resp["creator"].to_string(),
             };
-
-            println!("{:?}", _package.iswitches);
             print(_package);
         } else {
-            println!("Exiting")
+            println!(
+                "{}- {}",
+                ansi::green("Autocorrecting to "),
+                ansi::blue(result[0])
+            );
+            println!("Continue? (y/n)");
+
+            let mut cont = String::new();
+            io::stdin()
+                .read_line(&mut cont)
+                .expect("Failed to read line");
+            if cont.to_ascii_lowercase() == "y\r\n" {
+                let resp = requests::get_package(result[0]);
+                let ref pkg = resp[&resp[r#"version"#].to_string()];
+                let _package = package::Package {
+                    package_name: resp["package_name"].to_string(),
+                    display_name: resp["display_name"].to_string(),
+                    version: resp["version"].to_string(),
+                    threads: resp["threads"].to_string().parse::<i8>().unwrap(),
+                    url: pkg["url"].to_string(),
+                    file_type: pkg[r#"file-type"#].to_string(),
+                    iswitches: pkg["iswitches"].as_array().unwrap().to_vec(),
+                    uswitches: pkg["uswitches"].as_array().unwrap().to_vec(),
+                    dependencies: pkg["dependencies"].as_array().unwrap().to_vec(),
+                    Home_page: resp["Home_page"].to_string(),
+                    creator: resp["creator"].to_string(),
+                };
+
+                println!("{:?}", _package.iswitches);
+                print(_package);
+            } else {
+                println!("Exiting")
+            }
         }
+    } else {
+        println!(
+            "{} {} {}\n\t {}",
+            ansi::red("Couldn't find"),
+            ansi::red(app_name),
+            ansi::red(&format!(
+                ":Run \"joule search {}\" to find apps matching {}",
+                app_name, app_name
+            )),
+            ansi::blue("or ask for a package here https://github.com/joule-package-manager/joule-packages/issues/1")
+        )
     }
 }
